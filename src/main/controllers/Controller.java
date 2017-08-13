@@ -24,6 +24,9 @@ public class Controller {
     public Button generateButton;
     public Label errorLable;
 
+    public void initialize() {
+        errorLable.setText("");
+    }
     public void browseDir(ActionEvent actionEvent) {
         DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle("JavaFX Projects");
@@ -43,6 +46,7 @@ public class Controller {
                 if (Long.parseLong(numberOfRecordField.getText()) >0) {
                     Long recordsCount = Long.valueOf(numberOfRecordField.getText());
                     xml.generate(fileName, dirName, recordsCount);
+                    initialize();
                 } else {
                     errorLable.setText("Number of records should be positive number!");
                 }
