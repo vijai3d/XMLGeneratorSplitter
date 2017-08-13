@@ -1,7 +1,5 @@
 package main.controllers;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -13,8 +11,8 @@ import org.xml.sax.SAXException;
 import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import static main.utils.FileNameCheck.containsIllegals;
 
 public class Controller {
     public Button browseButton;
@@ -60,9 +58,4 @@ public class Controller {
 
     }
 
-    public boolean containsIllegals(String toExamine) {
-        Pattern pattern = Pattern.compile("[\\w,\\s-]");
-        Matcher matcher = pattern.matcher(toExamine);
-        return matcher.find();
-    }
 }
