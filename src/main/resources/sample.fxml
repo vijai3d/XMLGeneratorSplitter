@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.Pane?>
+
+<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.controllers.Controller">
+  <tabs>
+    <Tab text="Generator">
+         <content>
+            <Pane prefHeight="200.0" prefWidth="200.0">
+               <children>
+                  <Label layoutX="23.0" layoutY="14.0" text="This section generates xml files with random strings. " />
+                  <Label layoutX="23.0" layoutY="57.0" text="Choose xml file name." />
+                  <TextField fx:id="nameField" layoutX="23.0" layoutY="78.0" />
+                  <TextField fx:id="dirField" layoutX="23.0" layoutY="140.0" prefHeight="31.0" prefWidth="392.0" promptText="C:/" />
+                  <Label layoutX="23.0" layoutY="119.0" text="Choose directory to save file" />
+                  <TextField fx:id="numberOfRecordField" layoutX="23.0" layoutY="202.0" />
+                  <Label layoutX="23.0" layoutY="181.0" text="Choose number of record" />
+                  <Button fx:id="browseButton" layoutX="434.0" layoutY="140.0" mnemonicParsing="false" onAction="#browseDir" text="Browse..." />
+                  <Button fx:id="generateButton" layoutX="23.0" layoutY="248.0" mnemonicParsing="false" onAction="#generateXML" text="GENERATE" />
+                  <ProgressBar layoutX="23.0" layoutY="289.0" prefHeight="23.0" prefWidth="560.0" progress="0.0" />
+               </children>
+            </Pane>
+         </content></Tab>
+    <Tab text="Splitter" />
+  </tabs>
+</TabPane>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:element name="record-table">
+		<xs:complexType>      
+			<xs:sequence>        
+				<xs:element name="record" maxOccurs="unbounded">
+					<xs:complexType>
+            <xs:sequence>
+              <xs:element name="record_id" maxOccurs="1" type="xs:long"/>
+              <xs:element name="record_rows"  maxOccurs="1">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="record_row" maxOccurs="30" type="xs:string"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>              
+            </xs:sequence>
+          </xs:complexType>
+				</xs:element>        
+        <xs:element name="footer" maxOccurs="1" minOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="record_count" maxOccurs="1" minOccurs="1" type="xs:long"/>
+              <xs:element name="record_row_count" maxOccurs="1" minOccurs="1" type="xs:long"/>
+            </xs:sequence> 
+          </xs:complexType>
+        </xs:element>        
+			</xs:sequence>      
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
