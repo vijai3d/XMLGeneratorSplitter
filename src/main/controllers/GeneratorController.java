@@ -1,6 +1,5 @@
 package main.controllers;
 
-import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
@@ -10,14 +9,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
-import javafx.stage.DirectoryChooser;
 import main.bussiness.Generator;
 import main.bussiness.newDirectory;
 import org.xml.sax.SAXException;
 import javax.xml.bind.JAXBException;
-import java.io.File;
 import java.io.IOException;
-
 import static main.utils.Checkers.checkFilename;
 import static main.utils.Checkers.checkNumber;
 
