@@ -20,8 +20,8 @@
                   <Label layoutX="23.0" layoutY="181.0" text="Choose number of record" />
                   <Button fx:id="browseButton" layoutX="434.0" layoutY="140.0" mnemonicParsing="false" onAction="#browseDir" text="Browse..." />
                   <Button fx:id="generateButton" layoutX="23.0" layoutY="248.0" mnemonicParsing="false" onAction="#generateXML" text="GENERATE" />
-                  <ProgressBar layoutX="23.0" layoutY="289.0" prefHeight="23.0" prefWidth="560.0" progress="0.0" />
                   <Label fx:id="errorLable" layoutX="23.0" layoutY="320.0" textFill="RED" />
+                  <ProgressIndicator fx:id="progressCircle" layoutX="150.0" layoutY="253.0" progress="0.0" />
                </children>
             </Pane>
          </content></Tab>

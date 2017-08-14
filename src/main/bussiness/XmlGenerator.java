@@ -1,5 +1,8 @@
 package main.bussiness;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.concurrent.Task;
 import main.domain.Footer;
 import main.domain.Record;
 import main.domain.RecordTable;
@@ -15,39 +18,38 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Scanner;
 
-public class XmlGenerator {
+public class XmlGenerator{
 
     public void generate(String fileName, String dirName, Long recordsCount) throws JAXBException, IOException, SAXException {
         RecordTable recordTable = new RecordTable();
-
-
         Footer footer = new Footer();
         footer.setRecordCount(recordsCount);
         int recordRowCount = 0;
 
         List<Record> recordList = new ArrayList();
-        // record element
-        for (long i=0; i<recordsCount; i++) {
-            List<String> stringList = new ArrayList(); // every record - new string list
-            Record record = new Record();
-            record.setRecordId((long) (i+1));
-            // random number of random string rows
-            Random random = new Random();
-            int randomNumber = random.nextInt(30)+1;
-            recordRowCount = recordRowCount + randomNumber;
 
-            for (int r = 0; r < randomNumber; r++) { //how many rows to add
-                RandomString string = new RandomString();
-                String randomString = string.getRandomString();
-                stringList.add(randomString);
-                Row row = new Row();
-                row.setString(stringList);
-                record.setRecordRow(row);
+            // record element
+            for (long i = 0; i < recordsCount; i++) {
+                List<String> stringList = new ArrayList(); // every record - new string list
+                Record record = new Record();
+                record.setRecordId((long) (i + 1));
+                // random number of random string rows
+                Random random = new Random();
+                int randomNumber = random.nextInt(30) + 1;
+                recordRowCount = recordRowCount + randomNumber;
+
+                for (int r = 0; r < randomNumber; r++) { //how many rows to add
+                    RandomString string = new RandomString();
+                    String randomString = string.getRandomString();
+                    stringList.add(randomString);
+                    Row row = new Row();
+                    row.setString(stringList);
+                    record.setRecordRow(row);
+                }
+                recordList.add(record); //create record
             }
-            recordList.add(record); //create record
-        }
+
         recordTable.setRecord(recordList); // creates list of records
         footer.setRecordRowCount(recordRowCount);
         recordTable.setFooter(footer); // creates footer
