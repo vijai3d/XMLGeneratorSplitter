@@ -37,7 +37,7 @@ public class Generator {
                     Random random = new Random();
                     int randomNumber = random.nextInt(30) + 1;
                     recordRowCount = recordRowCount + randomNumber;
-                    updateProgress(i + 1, recordsCount);
+
                     for (int r = 0; r < randomNumber; r++) { //how many rows to add
                         RandomString string = new RandomString();
                         String randomString = string.getRandomString();
@@ -48,6 +48,7 @@ public class Generator {
 
                     }
                     recordList.add(record); //create record
+                    updateProgress(i + 1, recordsCount);
                 }
 
                 recordTable.setRecord(recordList); // creates list of records

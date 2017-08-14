@@ -4,21 +4,21 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import main.bussiness.Generator;
-import main.bussiness.XmlGenerator;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.IOException;
-import java.util.Random;
 
-import static main.utils.FileNameCheck.containsIllegals;
+import static main.utils.Checkers.checkFilename;
+import static main.utils.Checkers.checkNumber;
 
 public class Controller {
     public Button browseButton;
@@ -28,6 +28,7 @@ public class Controller {
     public Button generateButton;
     public Label errorLable;
     public ProgressIndicator progressCircle;
+    public Button cancelButton;
 
     public void initialize() {
         errorLable.setText("");
@@ -42,17 +43,19 @@ public class Controller {
     }
 
     public void generateXML(ActionEvent actionEvent) throws JAXBException, IOException, SAXException {
-        //XmlGenerator xml = new XmlGenerator();
         Generator generator = new Generator();
         String fileName = nameField.getText();
         String dirName = dirField.getText();
-        Task generate = generator.runGenerator(fileName, dirName, Long.parseLong(numberOfRecordField.getText()));
-        if (containsIllegals(fileName)) {
+        String recordNumberInput = numberOfRecordField.getText();
+        if (checkFilename(fileName)) {
             if (!dirName.equals("")) {
-                if (Long.parseLong(numberOfRecordField.getText()) >0) {
+                if (checkNumber(recordNumberInput)) {
                     Long recordsCount = Long.valueOf(numberOfRecordField.getText());
+                    final Task generate = generator.runGenerator(fileName, dirName, recordsCount);
                     progressCircle.progressProperty().unbind();
                     progressCircle.progressProperty().bind(generate.progressProperty());
+                    generateButton.setDisable(true);
+                    cancelButton.setDisable(false);
                     generate.messageProperty().addListener(new ChangeListener<String>() {
                         public void changed(ObservableValue<? extends String> observable,
                                             String oldValue, String newValue) {
@@ -60,7 +63,16 @@ public class Controller {
                         }
                     });
                     new Thread(generate).start();
-                    //xml.generate(fileName, dirName, recordsCount);
+                    cancelButton.setOnAction(new EventHandler<ActionEvent>() {
+                        public void handle(ActionEvent event) {
+                            generateButton.setDisable(false);
+                            cancelButton.setDisable(true);
+                            generate.cancel(true);
+                            progressCircle.progressProperty().unbind();
+                            progressCircle.setProgress(0);
+                            errorLable.setText("Canceled!");
+                        }
+                    });
                     initialize();
                 } else {
                     errorLable.setText("Number of records should be positive number!");
@@ -71,8 +83,5 @@ public class Controller {
         } else {
             errorLable.setText("Please choose correct file name");
         }
-
-
     }
-
 }
