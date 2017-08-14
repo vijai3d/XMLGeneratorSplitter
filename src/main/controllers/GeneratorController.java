@@ -11,8 +11,8 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import main.bussiness.Generator;
+import main.bussiness.newDirectory;
 import org.xml.sax.SAXException;
-
 import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.IOException;
@@ -34,15 +34,9 @@ public class GeneratorController {
         errorLable.setText("");
     }
     public void browseDir(ActionEvent actionEvent) {
-        DirectoryChooser chooser = new DirectoryChooser();
-        chooser.setTitle("JavaFX Projects");
-        File defaultDirectory = new File("C:/");
-        chooser.setInitialDirectory(defaultDirectory);
-        File selectedDirectory = chooser.showDialog(browseButton.getScene().getWindow());
-        if (dirField != null && selectedDirectory != null) {
-            dirField.setText(String.valueOf(selectedDirectory)); //directory for generated file
-        }
+        newDirectory.directoryChoose(browseButton, dirField);
     }
+
 
     public void generateXML(ActionEvent actionEvent) throws JAXBException, IOException, SAXException {
         Generator generator = new Generator();
