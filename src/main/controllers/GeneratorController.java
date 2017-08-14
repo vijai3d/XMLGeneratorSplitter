@@ -20,7 +20,7 @@ import java.io.IOException;
 import static main.utils.Checkers.checkFilename;
 import static main.utils.Checkers.checkNumber;
 
-public class Controller {
+public class GeneratorController {
     public Button browseButton;
     public TextField dirField;
     public TextField nameField;
@@ -59,9 +59,10 @@ public class Controller {
                     generate.messageProperty().addListener(new ChangeListener<String>() {
                         public void changed(ObservableValue<? extends String> observable,
                                             String oldValue, String newValue) {
-                            System.out.println(newValue);
+
                         }
                     });
+
                     new Thread(generate).start();
                     cancelButton.setOnAction(new EventHandler<ActionEvent>() {
                         public void handle(ActionEvent event) {
@@ -73,6 +74,7 @@ public class Controller {
                             errorLable.setText("Canceled!");
                         }
                     });
+
                     initialize();
                 } else {
                     errorLable.setText("Number of records should be positive number!");

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<Pane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.controllers.SplitterController">
+   <children>
+      <Button layoutX="424.0" layoutY="77.0" mnemonicParsing="false" text="Browse..." />
+      <Label layoutX="22.0" layoutY="14.0" text="Splits one xml file to smaller parts " />
+      <Label layoutX="22.0" layoutY="56.0" text="Choose destination folder" />
+      <TextField editable="false" layoutX="22.0" layoutY="77.0" prefHeight="31.0" prefWidth="396.0" promptText="C:\" />
+      <Label layoutX="22.0" layoutY="126.0" text="Choose file size in bytes (min 500 bytes)" />
+      <TextField layoutX="22.0" layoutY="147.0" prefHeight="31.0" prefWidth="107.0" />
+      <Button layoutX="22.0" layoutY="200.0" mnemonicParsing="false" text="Split" />
+      <Button layoutX="89.0" layoutY="200.0" mnemonicParsing="false" text="Cancel" />
+      <ProgressIndicator layoutX="262.0" layoutY="175.0" prefHeight="112.0" prefWidth="77.0" progress="0.0" />
+   </children>
+</Pane>
