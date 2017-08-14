@@ -36,10 +36,12 @@ public class GeneratorController {
     public void browseDir(ActionEvent actionEvent) {
         DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle("JavaFX Projects");
-        File defaultDirectory = new File("c:/");
+        File defaultDirectory = new File("C:/");
         chooser.setInitialDirectory(defaultDirectory);
         File selectedDirectory = chooser.showDialog(browseButton.getScene().getWindow());
-        dirField.setText(String.valueOf(selectedDirectory)); //directory for generated file
+        if (dirField != null && selectedDirectory != null) {
+            dirField.setText(String.valueOf(selectedDirectory)); //directory for generated file
+        }
     }
 
     public void generateXML(ActionEvent actionEvent) throws JAXBException, IOException, SAXException {
