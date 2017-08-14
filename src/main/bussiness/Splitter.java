@@ -27,8 +27,13 @@ public class Splitter {
                 boolean allowNextTag = true;
                 long recordCounter = 0;
                 long numberOfRows = 0;
-                File fileToParse = new File(pathToFile); // to count number of files should be created
-                long maxProgress = fileToParse.length()/userBytes;
+                File fileToParse = new File(pathToFile); // to count number of files should be created for progress indicator
+                long maxProgress=0;
+                if (userBytes>4000) {
+                     maxProgress = fileToParse.length() / userBytes;
+                } else {
+                     maxProgress = fileToParse.length() / 4000;
+                }
 
                 String newFilePath = dir + "\\" + filePartNumber + ".xml";
                 InputStream xmlInputStream = new FileInputStream(pathToFile);
@@ -49,8 +54,7 @@ public class Splitter {
                         streamReader.next();
                     }
                     if (streamReader.getEventType() == XMLEvent.START_ELEMENT && streamReader.getLocalName().equals("record")) {
-
-                        if (file.length() <= userBytes/2) {
+                        if (file.length() <= userBytes) {
                             recordCounter++;
                             FileOutputStream fos = new FileOutputStream(file);
                             JAXBElement<Record> recordObj = unmarshaller.unmarshal(streamReader, Record.class);

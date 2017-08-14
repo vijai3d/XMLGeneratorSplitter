@@ -11,7 +11,7 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import main.bussiness.Splitter;
-import main.bussiness.newDirectory;
+import main.utils.newDirectory;
 
 import java.io.File;
 import static main.utils.Checkers.checkNumber;

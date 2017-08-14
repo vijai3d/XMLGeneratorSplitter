@@ -10,10 +10,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import main.bussiness.Generator;
-import main.bussiness.newDirectory;
+import main.utils.newDirectory;
 import org.xml.sax.SAXException;
+
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
+
 import static main.utils.Checkers.checkFilename;
 import static main.utils.Checkers.checkNumber;
 
@@ -30,10 +32,10 @@ public class GeneratorController {
     public void initialize() {
         errorLable.setText("");
     }
+
     public void browseDir(ActionEvent actionEvent) {
         newDirectory.directoryChoose(browseButton, dirField);
     }
-
 
     public void generateXML(ActionEvent actionEvent) throws JAXBException, IOException, SAXException {
         Generator generator = new Generator();
