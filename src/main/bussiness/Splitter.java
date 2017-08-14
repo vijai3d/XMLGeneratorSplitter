@@ -42,6 +42,9 @@ public class Splitter {
 
                 List<Record> recordList = new ArrayList<Record>();
                 while (streamReader.hasNext()) {
+                    if (isCancelled()) {
+                        break;
+                    }
                     if (allowNextTag) {
                         streamReader.next();
                     }

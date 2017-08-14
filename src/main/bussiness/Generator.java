@@ -28,28 +28,33 @@ public class Generator {
                 int recordRowCount = 0;
 
                 List<Record> recordList = new ArrayList();
+
                 // record element
-                for (long i = 0; i < recordsCount; i++) {
-                    List<String> stringList = new ArrayList(); // every record - new string list
-                    Record record = new Record();
-                    record.setRecordId((i + 1));
-                    // random number of random string rows
-                    Random random = new Random();
-                    int randomNumber = random.nextInt(30) + 1;
-                    recordRowCount = recordRowCount + randomNumber;
 
-                    for (int r = 0; r < randomNumber; r++) { //how many rows to add
-                        RandomString string = new RandomString();
-                        String randomString = string.getRandomString();
-                        stringList.add(randomString);
-                        Row row = new Row();
-                        row.setString(stringList);
-                        record.setRecordRow(row);
+                    for (long i = 0; i < recordsCount; i++) {
+                        if (isCancelled()) {
+                            break;
+                        }
+                        List<String> stringList = new ArrayList(); // every record - new string list
+                        Record record = new Record();
+                        record.setRecordId((i + 1));
+                        // random number of random string rows
+                        Random random = new Random();
+                        int randomNumber = random.nextInt(30) + 1;
+                        recordRowCount = recordRowCount + randomNumber;
 
+                        for (int r = 0; r < randomNumber; r++) { //how many rows to add
+                            RandomString string = new RandomString();
+                            String randomString = string.getRandomString();
+                            stringList.add(randomString);
+                            Row row = new Row();
+                            row.setString(stringList);
+                            record.setRecordRow(row);
+
+                        }
+                        recordList.add(record); //create record
+                        updateProgress(i + 1, recordsCount);
                     }
-                    recordList.add(record); //create record
-                    updateProgress(i + 1, recordsCount);
-                }
 
                 recordTable.setRecord(recordList); // creates list of records
                 footer.setRecordRowCount(recordRowCount);
