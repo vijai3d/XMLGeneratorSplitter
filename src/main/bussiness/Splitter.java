@@ -12,18 +12,17 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.events.XMLEvent;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Splitter {
+
     public Task split(final String fileName, final String pathToFile, final String dir, final Long userBytes) {
         return new Task() {
             @Override
             protected Object call() throws Exception {
+                File tempFile = new File(dir+"\\" + "temp.xml");
                 long filePartNumber = 0;
                 boolean allowNextTag = true;
                 long recordCounter = 0;
@@ -48,11 +47,14 @@ public class Splitter {
                     if (isCancelled()) { break; }
                     if (allowNextTag) { streamReader.next(); }
                     if (streamReader.getEventType() == XMLEvent.START_ELEMENT && streamReader.getLocalName().equals("record")) {
-                        if (file.length() <= userBytes) {
+                        if (file.length() + tempFile.length() <= userBytes) {
+                            tempFile.delete();
+                            FileOutputStream tempRecord = new FileOutputStream(tempFile);
                             recordCounter++;
                             FileOutputStream fos = new FileOutputStream(file);
                             JAXBElement<Record> recordObj = unmarshaller.unmarshal(streamReader, Record.class);
                             Record record = recordObj.getValue();
+                            marshaller.marshal(record, tempRecord);
                             recordList.add(record);
                             RecordTable recordTable = new RecordTable();
                             recordTable.setRecord(recordList);
@@ -72,12 +74,12 @@ public class Splitter {
                             numberOfRows =0;
                             allowNextTag = false;
                             filePartNumber++;
-
                             newFilePath = dir +"\\"+fileName+"_"+ filePartNumber + ".xml";
                             file = new File(newFilePath);
                         }
                     }
                 }
+                tempFile.delete();
                 streamReader.close();
                 return true;
             }
