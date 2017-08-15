@@ -12,10 +12,8 @@ import javafx.scene.control.TextField;
 import main.bussiness.Generator;
 import main.utils.newDirectory;
 import org.xml.sax.SAXException;
-
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
-
 import static main.utils.Checkers.checkFilename;
 import static main.utils.Checkers.checkNumber;
 
@@ -59,16 +57,7 @@ public class GeneratorController {
                     });
 
                     new Thread(generate).start();
-                    cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-                        public void handle(ActionEvent event) {
-                            generateButton.setDisable(false);
-                            cancelButton.setDisable(true);
-                            generate.cancel(true);
-                            progressCircle.progressProperty().unbind();
-                            progressCircle.setProgress(0);
-                            errorLable.setText("Canceled!");
-                        }
-                    });
+                    doCancel(generate, cancelButton, generateButton, progressCircle, errorLable);
 
                     initialize();
                 } else {
@@ -80,5 +69,18 @@ public class GeneratorController {
         } else {
             errorLable.setText("Please choose correct file name");
         }
+    }
+
+    static void doCancel(final Task generate, final Button cancelButton, final Button generateButton, final ProgressIndicator progressCircle, final Label errorLable) {
+        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                generateButton.setDisable(false);
+                cancelButton.setDisable(true);
+                generate.cancel(true);
+                progressCircle.progressProperty().unbind();
+                progressCircle.setProgress(0);
+                errorLable.setText("Canceled!");
+            }
+        });
     }
 }

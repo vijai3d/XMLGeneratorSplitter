@@ -4,6 +4,7 @@ import javafx.concurrent.Task;
 import main.domain.Footer;
 import main.domain.Record;
 import main.domain.RecordTable;
+import main.utils.XmlValidation;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
@@ -19,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Splitter {
-    public Task split(final String pathToFile, final String dir, final Long userBytes) {
+    public Task split(final String fileName, final String pathToFile, final String dir, final Long userBytes) {
         return new Task() {
             @Override
             protected Object call() throws Exception {
@@ -27,16 +28,13 @@ public class Splitter {
                 boolean allowNextTag = true;
                 long recordCounter = 0;
                 long numberOfRows = 0;
-                File fileToParse = new File(pathToFile); // to count number of files should be created for progress indicator
-                long maxProgress=0;
-                if (userBytes>4000) {
-                     maxProgress = fileToParse.length() / userBytes;
-                } else {
-                     maxProgress = fileToParse.length() / 4000;
-                }
+                long maxProgress = getMaxProgress(pathToFile, userBytes);
+                XmlValidation xmlValidation = new XmlValidation();
+                xmlValidation.validateFile(pathToFile);
 
-                String newFilePath = dir + "\\" + filePartNumber + ".xml";
+                String newFilePath = dir + "\\" +fileName+"_"+ filePartNumber + ".xml";
                 InputStream xmlInputStream = new FileInputStream(pathToFile);
+
                 XMLInputFactory xmlInputFactory =  XMLInputFactory.newInstance();
                 XMLStreamReader streamReader =  xmlInputFactory.createXMLStreamReader(xmlInputStream);
                 JAXBContext context = JAXBContext.newInstance(RecordTable.class);
@@ -47,12 +45,8 @@ public class Splitter {
 
                 List<Record> recordList = new ArrayList<Record>();
                 while (streamReader.hasNext()) {
-                    if (isCancelled()) {
-                        break;
-                    }
-                    if (allowNextTag) {
-                        streamReader.next();
-                    }
+                    if (isCancelled()) { break; }
+                    if (allowNextTag) { streamReader.next(); }
                     if (streamReader.getEventType() == XMLEvent.START_ELEMENT && streamReader.getLocalName().equals("record")) {
                         if (file.length() <= userBytes) {
                             recordCounter++;
@@ -79,7 +73,7 @@ public class Splitter {
                             allowNextTag = false;
                             filePartNumber++;
 
-                            newFilePath = dir +"\\" + filePartNumber + ".xml";
+                            newFilePath = dir +"\\"+fileName+"_"+ filePartNumber + ".xml";
                             file = new File(newFilePath);
                         }
                     }
@@ -88,5 +82,16 @@ public class Splitter {
                 return true;
             }
         };
+    }
+
+    private long getMaxProgress(String pathToFile, Long userBytes) {
+        File fileToParse = new File(pathToFile); // to count number of files should be created for progress indicator
+        long maxProgress;
+        if (userBytes>4000) {
+             maxProgress = fileToParse.length() / userBytes;
+        } else {
+             maxProgress = fileToParse.length() / 4000;
+        }
+        return maxProgress;
     }
 }

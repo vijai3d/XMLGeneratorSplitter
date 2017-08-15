@@ -4,7 +4,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
@@ -12,8 +11,8 @@ import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import main.bussiness.Splitter;
 import main.utils.newDirectory;
-
 import java.io.File;
+import static main.controllers.GeneratorController.doCancel;
 import static main.utils.Checkers.checkNumber;
 
 public class SplitterController {
@@ -26,6 +25,7 @@ public class SplitterController {
     public Button dirBrowseButton;
     public ProgressIndicator progressCircle;
     public Button cancelButton;
+    private File selectedFile;
 
     public void initialize() {
         errorLabel.setText("");
@@ -38,7 +38,7 @@ public class SplitterController {
                 new FileChooser.ExtensionFilter("XML Files", "*.xml"));
         File defaultDirectory = new File("C:/");
         chooser.setInitialDirectory(defaultDirectory);
-        File selectedFile = chooser.showOpenDialog(browseFile.getScene().getWindow());
+        selectedFile = chooser.showOpenDialog(browseFile.getScene().getWindow());
         if (fileField != null && selectedFile != null) {
             fileField.setText(String.valueOf(selectedFile)); //directory for splitted files
         }
@@ -56,7 +56,8 @@ public class SplitterController {
             if (!dir.equals("")) {
                 if (checkNumber(bytes)) {
                     Long userBytes = Long.valueOf(bytesField.getText());
-                    final Task split = splitter.split(pathToFile, dir, userBytes);
+                    String fileName = selectedFile.getName().replaceFirst("[.][^.]+$", "");
+                    final Task split = splitter.split(fileName, pathToFile, dir, userBytes);
                     progressCircle.progressProperty().unbind();
                     progressCircle.progressProperty().bind(split.progressProperty());
                     splitButton.setDisable(true);
@@ -67,19 +68,8 @@ public class SplitterController {
 
                         }
                     });
-
                     new Thread(split).start();
-                    cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-                        public void handle(ActionEvent event) {
-                            splitButton.setDisable(false);
-                            cancelButton.setDisable(true);
-                            split.cancel(true);
-                            progressCircle.progressProperty().unbind();
-                            progressCircle.setProgress(0);
-                            errorLabel.setText("Canceled!");
-                        }
-                    });
-
+                    doCancel(split, cancelButton, splitButton, progressCircle, errorLabel);
                     initialize();
                 } else {
                     errorLabel.setText("Number of records should be positive number!");
@@ -91,6 +81,4 @@ public class SplitterController {
             errorLabel.setText("Please choose correct file name");
         }
     }
-
-
 }
