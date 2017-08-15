@@ -3,7 +3,9 @@ package main.controllers;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
@@ -13,6 +15,7 @@ import main.bussiness.Splitter;
 import main.utils.newDirectory;
 import java.io.File;
 import static main.controllers.GeneratorController.doCancel;
+import static main.controllers.GeneratorController.onSucceeded;
 import static main.utils.Checkers.checkNumber;
 
 public class SplitterController {
@@ -69,6 +72,7 @@ public class SplitterController {
                         }
                     });
                     new Thread(split).start();
+                    onSucceeded(split, splitButton, cancelButton);
                     doCancel(split, cancelButton, splitButton, progressCircle, errorLabel);
                     initialize();
                 } else {

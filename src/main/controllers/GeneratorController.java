@@ -3,6 +3,7 @@ package main.controllers;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
@@ -57,6 +58,7 @@ public class GeneratorController {
                     });
 
                     new Thread(generate).start();
+                    onSucceeded(generate, generateButton, cancelButton);
                     doCancel(generate, cancelButton, generateButton, progressCircle, errorLable);
 
                     initialize();
@@ -69,6 +71,17 @@ public class GeneratorController {
         } else {
             errorLable.setText("Please choose correct file name");
         }
+    }
+
+    static void onSucceeded(Task generate, final Button generateButton, final Button cancelButton) {
+        generate.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+            @Override
+            public void handle(WorkerStateEvent t)
+            {
+                generateButton.setDisable(false);
+                cancelButton.setDisable(true);
+            }
+        });
     }
 
     static void doCancel(final Task generate, final Button cancelButton, final Button generateButton, final ProgressIndicator progressCircle, final Label errorLable) {
