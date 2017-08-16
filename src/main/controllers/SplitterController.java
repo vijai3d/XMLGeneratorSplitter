@@ -1,5 +1,6 @@
 package main.controllers;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
@@ -30,9 +31,7 @@ public class SplitterController {
     public Button cancelButton;
     private File selectedFile;
 
-    public void initialize() {
-        errorLabel.setText("");
-    }
+
 
     public void browseFileSpl(ActionEvent actionEvent) {
         FileChooser chooser = new FileChooser();
@@ -63,6 +62,7 @@ public class SplitterController {
                     final Task split = splitter.split(fileName, pathToFile, dir, userBytes);
                     progressCircle.progressProperty().unbind();
                     progressCircle.progressProperty().bind(split.progressProperty());
+                    errorLabel.textProperty().bind(split.messageProperty());
                     splitButton.setDisable(true);
                     cancelButton.setDisable(false);
                     split.messageProperty().addListener(new ChangeListener<String>() {
@@ -74,7 +74,6 @@ public class SplitterController {
                     new Thread(split).start();
                     onSucceeded(split, splitButton, cancelButton);
                     doCancel(split, cancelButton, splitButton, progressCircle, errorLabel);
-                    initialize();
                 } else {
                     errorLabel.setText("Number of records should be positive number!");
                 }

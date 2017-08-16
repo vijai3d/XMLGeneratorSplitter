@@ -28,10 +28,6 @@ public class GeneratorController {
     public ProgressIndicator progressCircle;
     public Button cancelButton;
 
-    public void initialize() {
-        errorLable.setText("");
-    }
-
     public void browseDir(ActionEvent actionEvent) {
         newDirectory.directoryChoose(browseButton, dirField);
     }
@@ -48,6 +44,7 @@ public class GeneratorController {
                     final Task generate = generator.runGenerator(fileName, dirName, recordsCount);
                     progressCircle.progressProperty().unbind();
                     progressCircle.progressProperty().bind(generate.progressProperty());
+                    errorLable.textProperty().bind(generate.messageProperty());
                     generateButton.setDisable(true);
                     cancelButton.setDisable(false);
                     generate.messageProperty().addListener(new ChangeListener<String>() {
@@ -58,7 +55,6 @@ public class GeneratorController {
                     new Thread(generate).start();
                     onSucceeded(generate, generateButton, cancelButton);
                     doCancel(generate, cancelButton, generateButton, progressCircle, errorLable);
-                    initialize();
                 } else { errorLable.setText("Number of records should be positive number!"); }
             } else { errorLable.setText("Please choose directory"); }
         } else { errorLable.setText("Please choose correct file name"); }
@@ -83,7 +79,6 @@ public class GeneratorController {
                 generate.cancel(true);
                 progressCircle.progressProperty().unbind();
                 progressCircle.setProgress(0);
-                errorLable.setText("Canceled!");
             }
         });
     }

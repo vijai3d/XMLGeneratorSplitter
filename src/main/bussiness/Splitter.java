@@ -41,12 +41,14 @@ public class Splitter {
                 File file = new File(newFilePath);
                 Marshaller marshaller = context.createMarshaller();
                 marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-
+                Record recordToNextFile = null;
                 ByteArrayOutputStream tempRecord = new ByteArrayOutputStream();
                 List<Record> recordList = new ArrayList<Record>();
                 while (streamReader.hasNext()) {
 
-                    if (isCancelled()) { break; }
+                    if (isCancelled()) {
+                        updateMessage("Canceled!");
+                        break; }
                     if (allowNextTag) { streamReader.next(); }
                     if (streamReader.getEventType() == XMLEvent.START_ELEMENT && streamReader.getLocalName().equals("record")) {
 
@@ -58,14 +60,18 @@ public class Splitter {
                             marshaller.marshal(record, tempRecord);
                             tempRecord.flush();
                             tempRecord.close();
-
-                            recordCounter++;
-                            recordList.add(record);
-
+                            if (tempRecord.size() + 225 > userBytes) { // 225 bytes - approximately footer with header tags
+                                updateMessage("Looks like one some record is too big. Hit Cancel and increase file size");
+                            }
+                            if (file.length() + tempRecord.size() <= userBytes) {
+                                recordCounter++;
+                                recordList.add(record);
+                            } else {
+                                recordToNextFile = recordList.get(recordList.size() - 1); //take last record from list
+                            }
                             numberOfRows = getNumberOfRows(numberOfRows, record);
                             RecordTable recordTable = new RecordTable();
                             recordTable.setRecord(recordList);
-
                             Footer footer = new Footer();
                             footer.setRecordCount(recordCounter);
                             footer.setRecordRowCount(numberOfRows);
@@ -76,6 +82,7 @@ public class Splitter {
                             updateProgress(filePartNumber+1, maxProgress );
                         } else {
                             recordList.clear();
+                            recordList.add(recordToNextFile);
                             recordCounter = 0;
                             numberOfRows =0;
                             allowNextTag = false;
