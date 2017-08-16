@@ -61,10 +61,10 @@ public class Splitter {
                                 recordCounter++;
                                 recordList.add(record);
                             }
+                            numberOfRows = getNumberOfRows(numberOfRows, record);
                             RecordTable recordTable = new RecordTable();
                             recordTable.setRecord(recordList);
-                            long recRowCounter = record.getRecordRow().getString().size();
-                            numberOfRows = numberOfRows + recRowCounter;
+
                             Footer footer = new Footer();
                             footer.setRecordCount(recordCounter);
                             footer.setRecordRowCount(numberOfRows);
@@ -88,6 +88,12 @@ public class Splitter {
                 return true;
             }
         };
+    }
+
+    private long getNumberOfRows(long numberOfRows, Record record) {
+        long recRowCounter = record.getRecordRow().getString().size();
+        numberOfRows = numberOfRows + recRowCounter;
+        return numberOfRows;
     }
 
     private long getMaxProgress(String pathToFile, Long userBytes) {

@@ -53,24 +53,15 @@ public class GeneratorController {
                     generate.messageProperty().addListener(new ChangeListener<String>() {
                         public void changed(ObservableValue<? extends String> observable,
                                             String oldValue, String newValue) {
-
                         }
                     });
-
                     new Thread(generate).start();
                     onSucceeded(generate, generateButton, cancelButton);
                     doCancel(generate, cancelButton, generateButton, progressCircle, errorLable);
-
                     initialize();
-                } else {
-                    errorLable.setText("Number of records should be positive number!");
-                }
-            } else {
-                errorLable.setText("Please choose directory");
-            }
-        } else {
-            errorLable.setText("Please choose correct file name");
-        }
+                } else { errorLable.setText("Number of records should be positive number!"); }
+            } else { errorLable.setText("Please choose directory"); }
+        } else { errorLable.setText("Please choose correct file name"); }
     }
 
     static void onSucceeded(Task generate, final Button generateButton, final Button cancelButton) {
