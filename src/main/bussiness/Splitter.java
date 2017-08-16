@@ -41,26 +41,27 @@ public class Splitter {
                 File file = new File(newFilePath);
                 Marshaller marshaller = context.createMarshaller();
                 marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-                File tempFile = new File(dir+"\\" + "temp.xml");
+
+                ByteArrayOutputStream tempRecord = new ByteArrayOutputStream();
                 List<Record> recordList = new ArrayList<Record>();
                 while (streamReader.hasNext()) {
 
                     if (isCancelled()) { break; }
                     if (allowNextTag) { streamReader.next(); }
                     if (streamReader.getEventType() == XMLEvent.START_ELEMENT && streamReader.getLocalName().equals("record")) {
-                        if (file.length() + tempFile.length() <= userBytes || recordCounter == 0) {
 
-                            //FileOutputStream fos = new FileOutputStream(file);
+                        if (file.length() + tempRecord.size() <= userBytes) {
+
                             JAXBElement<Record> recordObj = unmarshaller.unmarshal(streamReader, Record.class);
                             Record record = recordObj.getValue();
+                            tempRecord = new ByteArrayOutputStream();
+                            marshaller.marshal(record, tempRecord);
+                            tempRecord.flush();
+                            tempRecord.close();
 
-                            //FileOutputStream tempRecord = new FileOutputStream(tempFile);
-                            marshaller.marshal(record, tempFile);
+                            recordCounter++;
+                            recordList.add(record);
 
-                            if (file.length() + tempFile.length() <= userBytes) { //second check after tempFile creation
-                                recordCounter++;
-                                recordList.add(record);
-                            }
                             numberOfRows = getNumberOfRows(numberOfRows, record);
                             RecordTable recordTable = new RecordTable();
                             recordTable.setRecord(recordList);
@@ -70,7 +71,7 @@ public class Splitter {
                             footer.setRecordRowCount(numberOfRows);
                             recordTable.setFooter(footer);
                             marshaller.marshal(recordTable, file);
-                            //fos.close();
+
                             allowNextTag = true;
                             updateProgress(filePartNumber+1, maxProgress );
                         } else {
@@ -100,9 +101,9 @@ public class Splitter {
         File fileToParse = new File(pathToFile); // to count number of files should be created for progress indicator
         long maxProgress;
         if (userBytes>4000) {
-             maxProgress = fileToParse.length() / userBytes;
+            maxProgress = fileToParse.length() / userBytes;
         } else {
-             maxProgress = fileToParse.length() / 4000;
+            maxProgress = fileToParse.length() / 4000;
         }
         return maxProgress;
     }
