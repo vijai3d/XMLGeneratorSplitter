@@ -22,7 +22,7 @@ public class Splitter {
         return new Task() {
             @Override
             protected Object call() throws Exception {
-                File tempFile = new File(dir+"\\" + "temp.xml");
+
                 long filePartNumber = 0;
                 boolean allowNextTag = true;
                 long recordCounter = 0;
@@ -41,31 +41,36 @@ public class Splitter {
                 File file = new File(newFilePath);
                 Marshaller marshaller = context.createMarshaller();
                 marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-
+                File tempFile = new File(dir+"\\" + "temp.xml");
                 List<Record> recordList = new ArrayList<Record>();
                 while (streamReader.hasNext()) {
+
                     if (isCancelled()) { break; }
                     if (allowNextTag) { streamReader.next(); }
                     if (streamReader.getEventType() == XMLEvent.START_ELEMENT && streamReader.getLocalName().equals("record")) {
-                        if (file.length() + tempFile.length() <= userBytes) {
-                            tempFile.delete();
-                            FileOutputStream tempRecord = new FileOutputStream(tempFile);
-                            recordCounter++;
-                            FileOutputStream fos = new FileOutputStream(file);
+                        if (file.length() + tempFile.length() <= userBytes || recordCounter == 0) {
+
+                            //FileOutputStream fos = new FileOutputStream(file);
                             JAXBElement<Record> recordObj = unmarshaller.unmarshal(streamReader, Record.class);
                             Record record = recordObj.getValue();
-                            marshaller.marshal(record, tempRecord);
-                            recordList.add(record);
+
+                            //FileOutputStream tempRecord = new FileOutputStream(tempFile);
+                            marshaller.marshal(record, tempFile);
+
+                            if (file.length() + tempFile.length() <= userBytes) { //second check after tempFile creation
+                                recordCounter++;
+                                recordList.add(record);
+                            }
                             RecordTable recordTable = new RecordTable();
                             recordTable.setRecord(recordList);
-                            Footer footer = new Footer();
-                            footer.setRecordCount(recordCounter);
                             long recRowCounter = record.getRecordRow().getString().size();
                             numberOfRows = numberOfRows + recRowCounter;
+                            Footer footer = new Footer();
+                            footer.setRecordCount(recordCounter);
                             footer.setRecordRowCount(numberOfRows);
                             recordTable.setFooter(footer);
-                            marshaller.marshal(recordTable, fos);
-                            fos.close();
+                            marshaller.marshal(recordTable, file);
+                            //fos.close();
                             allowNextTag = true;
                             updateProgress(filePartNumber+1, maxProgress );
                         } else {
@@ -79,7 +84,6 @@ public class Splitter {
                         }
                     }
                 }
-                tempFile.delete();
                 streamReader.close();
                 return true;
             }
