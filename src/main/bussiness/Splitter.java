@@ -5,7 +5,6 @@ import main.domain.Footer;
 import main.domain.Record;
 import main.domain.RecordTable;
 import main.utils.XmlValidation;
-
 import javax.xml.bind.*;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
@@ -89,26 +88,26 @@ public class Splitter {
         };
     }
 
-    private void saveTempRecord(long recordCounter, long numberOfRows, ByteArrayOutputStream tempRecord, Marshaller marshaller, List<Record> recordList) throws JAXBException, IOException {
-
-        RecordTable recordTable = new RecordTable();
-        recordTable.setRecord(recordList);
-        Footer footer = new Footer();
-        footer.setRecordCount(recordCounter);
-        footer.setRecordRowCount(numberOfRows);
-        recordTable.setFooter(footer);
+    private void saveTempRecord(long recordCounter, long numberOfRows, ByteArrayOutputStream tempRecord,
+                                Marshaller marshaller, List<Record> recordList) throws JAXBException, IOException {
+        RecordTable recordTable = getRecordTable(recordCounter, numberOfRows, recordList);
         marshaller.marshal(recordTable, tempRecord);
         tempRecord.flush();
         tempRecord.close();
     }
     private void saveXml(long recordCounter, long numberOfRows, File file, Marshaller marshaller, List<Record> recordList) throws JAXBException {
+        RecordTable recordTable = getRecordTable(recordCounter, numberOfRows, recordList);
+        marshaller.marshal(recordTable, file);
+    }
+
+    private RecordTable getRecordTable(long recordCounter, long numberOfRows, List<Record> recordList) {
         RecordTable recordTable = new RecordTable();
         recordTable.setRecord(recordList);
         Footer footer = new Footer();
         footer.setRecordCount(recordCounter);
         footer.setRecordRowCount(numberOfRows);
         recordTable.setFooter(footer);
-        marshaller.marshal(recordTable, file);
+        return recordTable;
     }
 
     private long getNumberOfRows(long numberOfRows, Record record) {

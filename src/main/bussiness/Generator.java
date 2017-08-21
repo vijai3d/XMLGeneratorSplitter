@@ -26,11 +26,8 @@ public class Generator {
                 Footer footer = new Footer();
                 footer.setRecordCount(recordsCount);
                 int recordRowCount = 0;
-
                 List<Record> recordList = new ArrayList();
-
                 // record element
-
                     for (long i = 0; i < recordsCount; i++) {
                         if (isCancelled()) {
                             break;
@@ -42,7 +39,6 @@ public class Generator {
                         Random random = new Random();
                         int randomNumber = random.nextInt(30) + 1;
                         recordRowCount = recordRowCount + randomNumber;
-
                         for (int r = 0; r < randomNumber; r++) { //how many rows to add
                             RandomString string = new RandomString();
                             String randomString = string.getRandomString();
@@ -55,17 +51,13 @@ public class Generator {
                         recordList.add(record); //create record
                         updateProgress(i + 1, recordsCount);
                     }
-
                 recordTable.setRecord(recordList); // creates list of records
                 footer.setRecordRowCount(recordRowCount);
                 recordTable.setFooter(footer); // creates footer
-
                 JAXBContext jaxbContext = JAXBContext.newInstance( RecordTable.class );
                 Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
                 jaxbMarshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, true );
                 jaxbMarshaller.marshal( recordTable, new File( dirName + "\\" +fileName+ ".xml" ) );
-                //jaxbMarshaller.marshal( recordTable, System.out );
-
                 // validate with schema
                 XmlValidation validation = new XmlValidation();
                 Record record = new Record();

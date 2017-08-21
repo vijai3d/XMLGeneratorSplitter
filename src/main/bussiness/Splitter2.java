@@ -1,10 +1,10 @@
 package main.bussiness;
+
 import javafx.concurrent.Task;
 import main.domain.Footer;
 import main.domain.Record;
 import main.domain.RecordTable;
 import main.utils.XmlValidation;
-
 import javax.xml.bind.*;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;

@@ -6,7 +6,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "record")
 public class Record {
-
     private Long recordId;
     private Row recordRow;
 
