@@ -14,6 +14,7 @@ import main.bussiness.Generator;
 import main.utils.newDirectory;
 import org.xml.sax.SAXException;
 import javax.xml.bind.JAXBException;
+import java.io.File;
 import java.io.IOException;
 import static main.utils.Checkers.checkFilename;
 import static main.utils.Checkers.checkNumber;
@@ -54,7 +55,7 @@ public class GeneratorController {
                     });
                     new Thread(generate).start();
                     onSucceeded(generate, generateButton, cancelButton);
-                    onCancel(generate, cancelButton, generateButton, progressCircle, errorLable);
+                    onCancel(generate, cancelButton, generateButton, progressCircle);
                 } else { errorLable.setText("Number of records should be positive number!"); }
             } else { errorLable.setText("Please choose directory"); }
         } else { errorLable.setText("Please choose correct file name"); }
@@ -71,7 +72,7 @@ public class GeneratorController {
         });
     }
 
-    static void onCancel(final Task generate, final Button cancelButton, final Button generateButton, final ProgressIndicator progressCircle, final Label errorLable) {
+    static void onCancel(final Task generate, final Button cancelButton, final Button generateButton, final ProgressIndicator progressCircle) {
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 generateButton.setDisable(false);
@@ -79,6 +80,23 @@ public class GeneratorController {
                 generate.cancel(true);
                 progressCircle.progressProperty().unbind();
                 progressCircle.setProgress(0);
+            }
+        });
+    }
+    static void onCancel(final Task generate, final Button cancelButton, final Button generateButton, final ProgressIndicator progressCircle, final String directory) {
+        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                generateButton.setDisable(false);
+                cancelButton.setDisable(true);
+                generate.cancel(true);
+                progressCircle.progressProperty().unbind();
+                progressCircle.setProgress(0);
+                File dir = new File(directory);
+                for (File file : dir.listFiles()) {
+                    if (!file.isDirectory()) {
+                        file.delete();
+                    }
+                }
             }
         });
     }

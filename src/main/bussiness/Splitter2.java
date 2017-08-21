@@ -48,27 +48,31 @@ public class Splitter2 {
                         Record record = recordObj.getValue();
                         nextRecord = saveNextRecord(marshaller, record);
                         if (nextRecord.size() + 225 > userBytes) { // 225 bytes - approximately footer with header tags
-                            updateMessage("Looks like some record is too big. Hit Cancel and increase file size");
+                            while (!isCancelled()) {
+                                updateMessage("Looks like some record is too big. Hit Cancel and increase file size");
+                            }
                         } else if (tempFile.size() + nextRecord.size() <= userBytes) {
                             recordCounter = recordList.size()+1;
                             recordList.add(record);
-                            numberOfRows =numberOfRows + getNumberOfRows(numberOfRows, record);
+                            numberOfRows = getNumberOfRows(numberOfRows, record);
                             saveTempRecord(recordCounter, numberOfRows, tempFile, marshaller, recordList);
                             updateProgress(filePartNumber+1, maxProgress );
                         } else {
                             saveXml(recordCounter, numberOfRows, file, marshaller, recordList);
                             tempFile = new ByteArrayOutputStream();
                             recordList.clear();
-                            recordList.add(record);
-                            saveTempRecord(recordCounter, numberOfRows, tempFile, marshaller, recordList);
-                            recordCounter = 0;
                             numberOfRows =0;
+                            recordList.add(record);
+                            numberOfRows = getNumberOfRows(numberOfRows, record);
+                            saveTempRecord(recordCounter, numberOfRows, tempFile, marshaller, recordList);
                             filePartNumber++;
                             newFilePath = dir +"\\"+fileName+"_"+ filePartNumber + ".xml";
                             file = new File(newFilePath);
                         }
                     }
                 }
+                recordCounter = recordList.size();
+                saveXml(recordCounter, numberOfRows, file, marshaller, recordList);
                 streamReader.close();
                 return true;
             }

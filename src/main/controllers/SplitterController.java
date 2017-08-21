@@ -68,7 +68,7 @@ public class SplitterController {
                     });
                     new Thread(split).start();
                     onSucceeded(split, splitButton, cancelButton);
-                    onCancel(split, cancelButton, splitButton, progressCircle, errorLabel);
+                    onCancel(split, cancelButton, splitButton, progressCircle, dir);
                 } else {
                     errorLabel.setText("Number of records should be positive number!");
                 }
