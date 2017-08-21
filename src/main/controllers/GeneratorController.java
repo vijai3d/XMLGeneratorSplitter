@@ -54,7 +54,7 @@ public class GeneratorController {
                     });
                     new Thread(generate).start();
                     onSucceeded(generate, generateButton, cancelButton);
-                    doCancel(generate, cancelButton, generateButton, progressCircle, errorLable);
+                    onCancel(generate, cancelButton, generateButton, progressCircle, errorLable);
                 } else { errorLable.setText("Number of records should be positive number!"); }
             } else { errorLable.setText("Please choose directory"); }
         } else { errorLable.setText("Please choose correct file name"); }
@@ -71,7 +71,7 @@ public class GeneratorController {
         });
     }
 
-    static void doCancel(final Task generate, final Button cancelButton, final Button generateButton, final ProgressIndicator progressCircle, final Label errorLable) {
+    static void onCancel(final Task generate, final Button cancelButton, final Button generateButton, final ProgressIndicator progressCircle, final Label errorLable) {
         cancelButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 generateButton.setDisable(false);

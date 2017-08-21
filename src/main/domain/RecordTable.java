@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlType;
 import java.util.List;
 
 @XmlType(propOrder = {"record", "footer"})
-@XmlRootElement( name="record-table" )
+@XmlRootElement( name="record-table")
 public class RecordTable {
 
     private List<Record> record;

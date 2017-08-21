@@ -1,5 +1,4 @@
 package main.bussiness;
-
 import javafx.concurrent.Task;
 import main.domain.Footer;
 import main.domain.Record;
@@ -14,15 +13,12 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Splitter {
-
+public class Splitter2 {
     public Task split(final String fileName, final String pathToFile, final String dir, final Long userBytes) {
         return new Task() {
             @Override
             protected Object call() throws Exception {
-
                 long filePartNumber = 0;
-                boolean allowNextTag = true;
                 long recordCounter = 0;
                 long numberOfRows = 0;
                 long maxProgress = getMaxProgress(pathToFile, userBytes);
@@ -39,44 +35,34 @@ public class Splitter {
                 File file = new File(newFilePath);
                 Marshaller marshaller = context.createMarshaller();
                 marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-                Record recordToNextFile = null;
+                ByteArrayOutputStream nextRecord;
                 ByteArrayOutputStream tempFile = new ByteArrayOutputStream();
-                ByteArrayOutputStream tempRecord = new ByteArrayOutputStream();
                 List<Record> recordList = new ArrayList<Record>();
                 while (streamReader.hasNext()) {
                     if (isCancelled()) {
                         updateMessage("Canceled!");
                         break; }
-                    if (allowNextTag) { streamReader.next(); }
+                            streamReader.next();
                     if (streamReader.getEventType() == XMLEvent.START_ELEMENT && streamReader.getLocalName().equals("record")) {
-                        if (tempRecord.size() + tempFile.size() <= userBytes) {
-                            JAXBElement<Record> recordObj = unmarshaller.unmarshal(streamReader, Record.class);
-                            Record record = recordObj.getValue();
-                            tempFile = new ByteArrayOutputStream();
-                            marshaller.marshal(record, tempFile);
-                            tempFile.flush();
-                            tempFile.close();
-                            if (tempFile.size() + 225 > userBytes) { // 225 bytes - approximately footer with header tags
-                                updateMessage("Looks like one some record is too big. Hit Cancel and increase file size");
-                            }
-                            if (tempRecord.size() + tempFile.size() <= userBytes) {
-                                recordCounter++;
-                                recordList.add(record);
-                                allowNextTag = true;
-                            } else {
-                                recordToNextFile = recordList.get(recordList.size() - 1); //take last record from list
-                            }
-                            numberOfRows = getNumberOfRows(numberOfRows, record);
-                            saveTempRecord(recordCounter, numberOfRows, tempRecord, marshaller, recordList);
+                        JAXBElement<Record> recordObj = unmarshaller.unmarshal(streamReader, Record.class);
+                        Record record = recordObj.getValue();
+                        nextRecord = saveNextRecord(marshaller, record);
+                        if (nextRecord.size() + 225 > userBytes) { // 225 bytes - approximately footer with header tags
+                            updateMessage("Looks like some record is too big. Hit Cancel and increase file size");
+                        } else if (tempFile.size() + nextRecord.size() <= userBytes) {
+                            recordCounter = recordList.size()+1;
+                            recordList.add(record);
+                            numberOfRows =numberOfRows + getNumberOfRows(numberOfRows, record);
+                            saveTempRecord(recordCounter, numberOfRows, tempFile, marshaller, recordList);
                             updateProgress(filePartNumber+1, maxProgress );
                         } else {
                             saveXml(recordCounter, numberOfRows, file, marshaller, recordList);
-                            tempRecord = new ByteArrayOutputStream();
+                            tempFile = new ByteArrayOutputStream();
                             recordList.clear();
-                            recordList.add(recordToNextFile);
+                            recordList.add(record);
+                            saveTempRecord(recordCounter, numberOfRows, tempFile, marshaller, recordList);
                             recordCounter = 0;
                             numberOfRows =0;
-                            allowNextTag = false;
                             filePartNumber++;
                             newFilePath = dir +"\\"+fileName+"_"+ filePartNumber + ".xml";
                             file = new File(newFilePath);
@@ -87,6 +73,15 @@ public class Splitter {
                 return true;
             }
         };
+    }
+
+    private ByteArrayOutputStream saveNextRecord(Marshaller marshaller, Record record) throws JAXBException, IOException {
+        ByteArrayOutputStream nextRecord;
+        nextRecord = new ByteArrayOutputStream();
+        marshaller.marshal(record, nextRecord);
+        nextRecord.flush();
+        nextRecord.close();
+        return nextRecord;
     }
 
     private void saveTempRecord(long recordCounter, long numberOfRows, ByteArrayOutputStream tempRecord, Marshaller marshaller, List<Record> recordList) throws JAXBException, IOException {

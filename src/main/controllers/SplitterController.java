@@ -1,21 +1,19 @@
 package main.controllers;
 
-import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
-import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import main.bussiness.Splitter;
+import main.bussiness.Splitter2;
 import main.utils.newDirectory;
 import java.io.File;
-import static main.controllers.GeneratorController.doCancel;
+import static main.controllers.GeneratorController.onCancel;
 import static main.controllers.GeneratorController.onSucceeded;
 import static main.utils.Checkers.checkNumber;
 
@@ -31,13 +29,10 @@ public class SplitterController {
     public Button cancelButton;
     private File selectedFile;
 
-
-
     public void browseFileSpl(ActionEvent actionEvent) {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Choose xml file to split");
-       chooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("XML Files", "*.xml"));
+        chooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("XML Files", "*.xml"));
         File defaultDirectory = new File("C:/");
         chooser.setInitialDirectory(defaultDirectory);
         selectedFile = chooser.showOpenDialog(browseFile.getScene().getWindow());
@@ -50,7 +45,7 @@ public class SplitterController {
     }
 
     public void splitsHandler(ActionEvent actionEvent) {
-        final Splitter splitter = new Splitter();
+        final Splitter2 splitter = new Splitter2();
         String pathToFile = fileField.getText();
         String dir = dirField.getText();
         String bytes = bytesField.getText();
@@ -73,7 +68,7 @@ public class SplitterController {
                     });
                     new Thread(split).start();
                     onSucceeded(split, splitButton, cancelButton);
-                    doCancel(split, cancelButton, splitButton, progressCircle, errorLabel);
+                    onCancel(split, cancelButton, splitButton, progressCircle, errorLabel);
                 } else {
                     errorLabel.setText("Number of records should be positive number!");
                 }
