@@ -11,7 +11,9 @@ import org.xml.sax.SAXException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +24,11 @@ public class Generator {
         return new Task() {
             @Override
             protected Object call() throws Exception {
+                JAXBContext jaxbContext = JAXBContext.newInstance( RecordTable.class );
+                Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+                jaxbMarshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, true );
+                File file = new File( dirName + "\\" +fileName+ ".xml" );
+                BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream( file, true));
                 RecordTable recordTable = new RecordTable();
                 Footer footer = new Footer();
                 footer.setRecordCount(recordsCount);
@@ -53,10 +60,10 @@ public class Generator {
                 recordTable.setRecord(recordList); // creates list of records
                 footer.setRecordRowCount(recordRowCount);
                 recordTable.setFooter(footer); // creates footer
-                JAXBContext jaxbContext = JAXBContext.newInstance( RecordTable.class );
-                Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-                jaxbMarshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, true );
-                jaxbMarshaller.marshal( recordTable, new File( dirName + "\\" +fileName+ ".xml" ) );
+
+
+
+                jaxbMarshaller.marshal( recordTable, stream );
                 // validate with schema
                 XmlValidation validation = new XmlValidation();
                 Record record = new Record();

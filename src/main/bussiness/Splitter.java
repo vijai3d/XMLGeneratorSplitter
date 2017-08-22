@@ -22,12 +22,11 @@ public class Splitter {
                 long recordCounter = 0;
                 long numberOfRows = 0;
                 long maxProgress = getMaxProgress(pathToFile, userBytes);
-                XmlValidation xmlValidation = new XmlValidation();
-                xmlValidation.validateFile(pathToFile);
+
+                makeValidation();
 
                 String newFilePath = dir + "\\" +fileName+"_"+ filePartNumber + ".xml";
                 InputStream xmlInputStream = new FileInputStream(pathToFile);
-
                 XMLInputFactory xmlInputFactory =  XMLInputFactory.newInstance();
                 XMLStreamReader streamReader =  xmlInputFactory.createXMLStreamReader(xmlInputStream);
                 JAXBContext context = JAXBContext.newInstance(RecordTable.class);
@@ -77,6 +76,17 @@ public class Splitter {
                 saveXmlFile(recordCounter, numberOfRows, file, marshaller, recordList);
                 streamReader.close();
                 return true;
+            }
+
+            private void makeValidation() {
+                XmlValidation xmlValidation = new XmlValidation();
+                try {
+                    xmlValidation.validateFile(pathToFile);
+                } catch (Exception e) {
+                    while (!isCancelled()) {
+                        updateMessage("Could not validate file");
+                    }
+                }
             }
         };
     }
