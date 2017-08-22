@@ -11,7 +11,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import main.bussiness.Generator;
-import main.bussiness.Generator2;
 import main.utils.newDirectory;
 import org.xml.sax.SAXException;
 import javax.xml.bind.JAXBException;
@@ -35,7 +34,7 @@ public class GeneratorController {
     }
 
     public void generateXML(ActionEvent actionEvent) throws JAXBException, IOException, SAXException {
-        Generator2 generator = new Generator2();
+        Generator generator = new Generator();
         String fileName = nameField.getText();
         String dirName = dirField.getText();
         String recordNumberInput = numberOfRecordField.getText();
