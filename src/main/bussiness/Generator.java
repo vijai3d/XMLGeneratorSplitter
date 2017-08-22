@@ -46,7 +46,6 @@ public class Generator {
                             Row row = new Row();
                             row.setString(stringList);
                             record.setRecordRow(row);
-
                         }
                         recordList.add(record); //create record
                         updateProgress(i + 1, recordsCount);

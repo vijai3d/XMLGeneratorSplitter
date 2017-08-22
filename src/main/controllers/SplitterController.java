@@ -10,7 +10,6 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import main.bussiness.Splitter;
-import main.bussiness.Splitter2;
 import main.utils.newDirectory;
 import java.io.File;
 import static main.controllers.GeneratorController.onCancel;
@@ -45,7 +44,7 @@ public class SplitterController {
     }
 
     public void splitsHandler(ActionEvent actionEvent) {
-        final Splitter2 splitter = new Splitter2();
+        final Splitter splitter = new Splitter();
         String pathToFile = fileField.getText();
         String dir = dirField.getText();
         String bytes = bytesField.getText();
