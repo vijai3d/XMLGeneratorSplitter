@@ -39,6 +39,7 @@ public class Splitter {
                 ByteArrayOutputStream tempFile = new ByteArrayOutputStream();
                 List<Record> recordList = new ArrayList<Record>();
                 while (streamReader.hasNext()) {
+                    updateMessage("Working...");
                     if (isCancelled()) {
                         updateMessage("Canceled!");
                         break; }
@@ -80,13 +81,16 @@ public class Splitter {
                 recordCounter = recordList.size();
                 saveXmlFile(recordCounter, numberOfRows, file, marshaller, recordList);
                 streamReader.close();
+                updateMessage("");
                 return true;
             }
 
             private void makeValidation() {
                 XmlValidation xmlValidation = new XmlValidation();
                 try {
+                    updateMessage("Validating...");
                     xmlValidation.validateFile(pathToFile);
+
                 } catch (Exception e) {
                     while (!isCancelled()) {
                         updateMessage("Could not validate file");
