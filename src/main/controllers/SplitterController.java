@@ -10,11 +10,9 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import main.bussiness.Splitter;
+import main.utils.Checkers;
 import main.utils.newDirectory;
 import java.io.File;
-import static main.controllers.GeneratorController.onCancel;
-import static main.controllers.GeneratorController.onSucceeded;
-import static main.utils.Checkers.checkNumber;
 
 public class SplitterController {
     public Button browseFile;
@@ -45,12 +43,13 @@ public class SplitterController {
 
     public void splitsHandler(ActionEvent actionEvent) {
         final Splitter splitter = new Splitter();
+        Checkers checkers = new Checkers();
         String pathToFile = fileField.getText();
         String dir = dirField.getText();
         String bytes = bytesField.getText();
         if (pathToFile != null) {
             if (!dir.equals("")) {
-                if (checkNumber(bytes)) {
+                if (checkers.checkNumber(bytes)) {
                     Long userBytes = Long.valueOf(bytesField.getText());
                     String fileName = selectedFile.getName().replaceFirst("[.][^.]+$", "");
                     final Task split = splitter.split(fileName, pathToFile, dir, userBytes);
@@ -66,8 +65,9 @@ public class SplitterController {
                         }
                     });
                     new Thread(split).start();
-                    onSucceeded(split, splitButton, cancelButton);
-                    onCancel(split, cancelButton, splitButton, progressCircle, dir);
+                    GeneratorController gc = new GeneratorController();
+                    gc.onSucceeded(split, splitButton, cancelButton);
+                    gc.onCancel(split, cancelButton, splitButton, progressCircle, dir);
                 } else {
                     errorLabel.setText("Number of records should be positive number!");
                 }
