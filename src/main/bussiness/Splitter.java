@@ -22,7 +22,7 @@ public class Splitter {
                 long recordCounter = 0;
                 long numberOfRows = 0;
                 long maxProgress = getMaxProgress(pathToFile, userBytes);
-
+                long chunk = optimizeBigFiles(userBytes);
                 makeValidation();
 
                 String newFilePath = dir + "\\" +fileName+"_"+ filePartNumber + ".xml";
@@ -51,6 +51,10 @@ public class Splitter {
                             while (!isCancelled()) {
                                 updateMessage("Looks like some record is too big. Hit Cancel and increase file size");
                             }
+                        } else if (chunk!=0) {
+                            chunk--;
+                            recordList.add(record);
+                            numberOfRows = getNumberOfRows(numberOfRows, record);
                         } else if (tempFile.size() + nextRecord.size() <= userBytes) {
                             tempFile = new ByteArrayOutputStream();
                             recordCounter = recordList.size()+1;
@@ -63,6 +67,7 @@ public class Splitter {
                             recordList.clear();
                             numberOfRows =0;
                             recordList.add(record);
+                            chunk = optimizeBigFiles(userBytes);
                             numberOfRows = getNumberOfRows(numberOfRows, record);
                             tempFile = new ByteArrayOutputStream();
                             saveTempRecord(recordCounter, numberOfRows, tempFile, marshaller, recordList);
@@ -89,6 +94,16 @@ public class Splitter {
                 }
             }
         };
+    }
+
+    private long optimizeBigFiles(Long userBytes) {
+        long chunk;
+        if (userBytes > 100000) {
+            chunk = userBytes/3200; //optimal average record size (not precise)
+        } else {
+            chunk = 0;
+        }
+        return chunk;
     }
 
     private ByteArrayOutputStream saveNextRecord(Marshaller marshaller, Record record) throws JAXBException, IOException {
@@ -134,7 +149,7 @@ public class Splitter {
         if (userBytes>7500) {
             maxProgress = fileToParse.length() / userBytes;
         } else {
-            maxProgress = fileToParse.length() / 3750; //quick way to get progress
+            maxProgress = fileToParse.length() / 3200; //quick way to get progress
         }
         return maxProgress;
     }
