@@ -16,19 +16,19 @@ import java.util.Random;
 
 public class Generator {
     public Task runGenerator(final String fileName, final String dirName, final Long recordsCount) throws JAXBException, IOException, SAXException {
-        final String pathToFile = dirName + "\\" +fileName+ ".xml";
+
         return new Task() {
             @Override
             protected Object call() throws Exception {
-
+                String pathToFile = dirName + "/" +fileName+ ".xml";
                 File file = new File(pathToFile);
                 BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream( file, true));
                 XMLOutputFactory xmlOutputFactory =  XMLOutputFactory.newFactory();
-                XMLStreamWriter sw =  xmlOutputFactory.createXMLStreamWriter(stream);
+                XMLStreamWriter sw =  xmlOutputFactory.createXMLStreamWriter(stream, "UTF-8");
 
                 long recordRowCount = 0;
                 sw = new IndentingXMLStreamWriter(sw);
-                sw.writeStartDocument("utf-8", "1.0");
+                sw.writeStartDocument("UTF-8", "1.0"); //problem here
                 sw.writeStartElement("record-table");
                 sw.flush();
                 for (long i = 0; i < recordsCount; i++) {
@@ -68,11 +68,11 @@ public class Generator {
                 sw.writeEndDocument();
                 sw.flush();
                 sw.close();
-                validateWithSchema();
+                validateWithSchema(pathToFile);
                 return true;
             }
 
-            private void validateWithSchema() {
+            private void validateWithSchema(String pathToFile) {
                 XmlValidation xmlValidation = new XmlValidation();
                 try {
                     xmlValidation.validateFile(pathToFile);

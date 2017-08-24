@@ -93,7 +93,7 @@ public class Splitter {
 
                 } catch (Exception e) {
                     while (!isCancelled()) {
-                        updateMessage("Could not validate file");
+                        updateMessage(xmlValidation.getExceptionMessage());
                     }
                 }
             }

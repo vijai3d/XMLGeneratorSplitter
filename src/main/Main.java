@@ -10,12 +10,11 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        Parent root = FXMLLoader.load(getClass().getResource("resources/generator.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/generator.fxml"));
         primaryStage.setTitle("XML Splitter");
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }
-
 
     public static void main(String[] args) {
         launch(args);
