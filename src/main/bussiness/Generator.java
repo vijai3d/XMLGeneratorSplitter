@@ -28,7 +28,7 @@ public class Generator {
 
                 long recordRowCount = 0;
                 sw = new IndentingXMLStreamWriter(sw);
-                sw.writeStartDocument("UTF-8", "1.0"); //problem here
+                sw.writeStartDocument("UTF-8", "1.0"); // caused runtime error if remove encoding parameter in create streamwriter
                 sw.writeStartElement("record-table");
                 sw.flush();
                 for (long i = 0; i < recordsCount; i++) {
