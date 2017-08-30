@@ -10,6 +10,7 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import main.bussiness.Splitter;
+import main.bussiness.Splitter2;
 import main.utils.Checkers;
 import main.utils.newDirectory;
 import java.io.File;
@@ -30,7 +31,7 @@ public class SplitterController {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Choose xml file to split");
         chooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("XML Files", "*.xml"));
-        File defaultDirectory = new File("C:/");
+        File defaultDirectory = new File("C:/Users/Vijai3d/Desktop");
         chooser.setInitialDirectory(defaultDirectory);
         selectedFile = chooser.showOpenDialog(browseFile.getScene().getWindow());
         if (fileField != null && selectedFile != null) {
@@ -42,7 +43,7 @@ public class SplitterController {
     }
 
     public void splitsHandler(ActionEvent actionEvent) {
-        final Splitter splitter = new Splitter();
+        final Splitter2 splitter = new Splitter2();
         Checkers checkers = new Checkers();
         String pathToFile = fileField.getText();
         String dir = dirField.getText();

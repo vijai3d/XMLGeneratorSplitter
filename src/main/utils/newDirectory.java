@@ -12,7 +12,7 @@ public class newDirectory {
     public static void directoryChoose(Button browseButton, TextField dirField) {
         DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle("Choose directory");
-        File defaultDirectory = new File("C:/");
+        File defaultDirectory = new File("C:/Users/Vijai3d/Desktop/temp");
         chooser.setInitialDirectory(defaultDirectory);
         File selectedDirectory = chooser.showDialog(browseButton.getScene().getWindow());
         if (dirField != null && selectedDirectory != null && selectedDirectory.isDirectory()
