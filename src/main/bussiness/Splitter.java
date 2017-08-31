@@ -44,15 +44,10 @@ public class Splitter {
                 while (streamReader.hasNext()) {
                     updateMessage("Working...");
                     if (isCancelled()) {
-                        stream.close();
-                        File dir = new File(pathToFile);
-                        for (File file2 : dir.listFiles()) {
-                            if (!file2.isDirectory()) {
-                                file2.delete();
-                            }
-                        }
+                        deleteFiles(stream, sw, dir);
                         updateMessage("Canceled!");
-                        break; }
+                        break;
+                    }
                         streamReader.next();
                     if (streamReader.getEventType() == XMLEvent.START_ELEMENT && streamReader.getLocalName().equals("record")) {
                         JAXBElement<Record> recordObj = unmarshaller.unmarshal(streamReader, Record.class);
@@ -95,6 +90,18 @@ public class Splitter {
                 }
             }
         };
+    }
+
+    private void deleteFiles(FileOutputStream stream, XMLStreamWriter sw, String dir) throws XMLStreamException, IOException {
+        sw.close();
+        stream.close();
+        System.gc();
+        File dirToDelete = new File(dir);
+        for (File fileToDelete : dirToDelete.listFiles()) {
+            if (!fileToDelete.isDirectory()) {
+                fileToDelete.delete();
+            }
+        }
     }
 
     private XMLStreamWriter saveHeader(File file, XMLOutputFactory xmlOutputFactory) throws FileNotFoundException, XMLStreamException {
