@@ -1,17 +1,16 @@
 package main.bussiness;
 
+import com.sun.xml.internal.txw2.output.IndentingXMLStreamWriter;
 import javafx.concurrent.Task;
-import main.domain.Footer;
 import main.domain.Record;
 import main.domain.RecordTable;
 import main.utils.XmlValidation;
-import javax.xml.bind.*;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamReader;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.*;
 import javax.xml.stream.events.XMLEvent;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Splitter {
     public Task split(final String fileName, final String pathToFile, final String dir, final Long userBytes) {
@@ -20,131 +19,168 @@ public class Splitter {
             protected Object call() throws Exception {
                 long filePartNumber = 0;
                 long recordCounter = 0;
-                long numberOfRows = 0;
+                int numberOfRows = 0;
+                updateMessage("Validating your file...");
+                validateWithSchema(pathToFile);
                 long maxProgress = getMaxProgress(pathToFile, userBytes);
-                long chunk = optimizeBigFiles(userBytes);
-                makeValidation();
+                updateProgress(filePartNumber+1, maxProgress);
 
+                JAXBContext context = JAXBContext.newInstance(RecordTable.class);
+                Unmarshaller unmarshaller = context.createUnmarshaller();
                 String newFilePath = dir + "\\" +fileName+"_"+ filePartNumber + ".xml";
+                File file = new File(newFilePath);
+
                 InputStream xmlInputStream = new FileInputStream(pathToFile);
                 XMLInputFactory xmlInputFactory =  XMLInputFactory.newInstance();
                 XMLStreamReader streamReader =  xmlInputFactory.createXMLStreamReader(xmlInputStream);
-                JAXBContext context = JAXBContext.newInstance(RecordTable.class);
-                Unmarshaller unmarshaller = context.createUnmarshaller();
 
-                File file = new File(newFilePath);
-                Marshaller marshaller = context.createMarshaller();
-                marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
                 ByteArrayOutputStream nextRecord;
-                ByteArrayOutputStream tempFile = new ByteArrayOutputStream();
-                List<Record> recordList = new ArrayList<Record>();
+                XMLOutputFactory xmlOutputFactory =  XMLOutputFactory.newFactory();
+                FileOutputStream stream=new FileOutputStream( file, true);
+                XMLStreamWriter sw;
+                sw = saveHeader(file, xmlOutputFactory);
+
                 while (streamReader.hasNext()) {
                     updateMessage("Working...");
                     if (isCancelled()) {
+                        stream.close();
+                        File dir = new File(pathToFile);
+                        for (File file2 : dir.listFiles()) {
+                            if (!file2.isDirectory()) {
+                                file2.delete();
+                            }
+                        }
                         updateMessage("Canceled!");
                         break; }
-                            streamReader.next();
+                        streamReader.next();
                     if (streamReader.getEventType() == XMLEvent.START_ELEMENT && streamReader.getLocalName().equals("record")) {
                         JAXBElement<Record> recordObj = unmarshaller.unmarshal(streamReader, Record.class);
                         Record record = recordObj.getValue();
-                        nextRecord = saveNextRecord(marshaller, record);
+                        nextRecord = saveNextRecordToMemory(xmlOutputFactory, record);
                         if (nextRecord.size() + 225 > userBytes) { // 225 bytes - approximately footer with header tags
                             while (!isCancelled()) {
                                 updateMessage("Looks like some record is too big. Hit Cancel and increase file size");
                             }
-                        } else if (chunk!=0) {
-                            chunk--;
-                            recordList.add(record);
-                            numberOfRows = getNumberOfRows(numberOfRows, record);
-                        } else if (tempFile.size() + nextRecord.size() <= userBytes) {
-                            tempFile = new ByteArrayOutputStream();
-                            recordCounter = recordList.size()+1;
-                            recordList.add(record);
-                            numberOfRows = getNumberOfRows(numberOfRows, record);
-                            saveTempRecord(recordCounter, numberOfRows, tempFile, marshaller, recordList);
-                            updateProgress(filePartNumber+1, maxProgress);
+                        }else if (file.length() + nextRecord.size() <= userBytes) {
+                            numberOfRows = addRecord(numberOfRows, sw, record);
+                            recordCounter++;
                         } else {
-                            saveXmlFile(recordCounter, numberOfRows, file, marshaller, recordList);
-                            recordList.clear();
-                            numberOfRows =0;
-                            recordList.add(record);
-                            chunk = optimizeBigFiles(userBytes);
-                            numberOfRows = getNumberOfRows(numberOfRows, record);
-                            tempFile = new ByteArrayOutputStream();
-                            saveTempRecord(recordCounter, numberOfRows, tempFile, marshaller, recordList);
+                            saveFooter(recordCounter, numberOfRows, sw);
+                            numberOfRows=0;
+                            updateProgress(filePartNumber+1, maxProgress);
                             filePartNumber++;
                             newFilePath = dir +"\\"+fileName+"_"+ filePartNumber + ".xml";
                             file = new File(newFilePath);
+                            recordCounter=1;
+                            sw = saveHeader(file, xmlOutputFactory);
+                            numberOfRows = addRecord(numberOfRows, sw, record);
                         }
                     }
                 }
-                recordCounter = recordList.size();
-                saveXmlFile(recordCounter, numberOfRows, file, marshaller, recordList);
+                saveFooter(recordCounter, numberOfRows, sw);
                 streamReader.close();
                 updateMessage("");
                 return true;
             }
 
-            private void makeValidation() {
+            private void validateWithSchema(String pathToFile) {
                 XmlValidation xmlValidation = new XmlValidation();
                 try {
-                    updateMessage("Validating...");
                     xmlValidation.validateFile(pathToFile);
-
                 } catch (Exception e) {
                     while (!isCancelled()) {
-                        updateMessage(xmlValidation.getExceptionMessage());
+                        updateMessage("Could not validate file");
                     }
                 }
             }
         };
     }
 
-    private long optimizeBigFiles(Long userBytes) {
-        long chunk;
-        if (userBytes > 100000) {
-            chunk = userBytes/3200; //optimal average record size (not precise)
-        } else {
-            chunk = 0;
-        }
-        return chunk;
+    private XMLStreamWriter saveHeader(File file, XMLOutputFactory xmlOutputFactory) throws FileNotFoundException, XMLStreamException {
+        FileOutputStream stream;
+        XMLStreamWriter sw;
+        stream = new FileOutputStream( file, true);
+        sw =  xmlOutputFactory.createXMLStreamWriter(stream, "UTF-8");
+        sw = new IndentingXMLStreamWriter(sw);
+        sw.writeStartDocument("UTF-8", "1.0"); // caused runtime error if remove encoding parameter in create streamwriter
+        sw.writeStartElement("record-table");
+        sw.flush();
+        return sw;
     }
 
-    private ByteArrayOutputStream saveNextRecord(Marshaller marshaller, Record record) throws JAXBException, IOException {
+    private ByteArrayOutputStream saveNextRecordToMemory(XMLOutputFactory xmlOutputFactory, Record record) throws XMLStreamException, IOException {
         ByteArrayOutputStream nextRecord;
         nextRecord = new ByteArrayOutputStream();
-        marshaller.marshal(record, nextRecord);
+        XMLStreamWriter nr =  xmlOutputFactory.createXMLStreamWriter(nextRecord, "UTF-8");
+        nr.writeStartElement("record");
+        nr.writeStartElement("record_id");
+        nr.writeCharacters(record.getRecordId().toString());
+        nr.writeEndElement();
+        nr.writeStartElement("record_rows");
+        int i=0;//record rows in each record
+        while(true) {
+            try {
+                if(record.getRecordRow().getString().get(i) !=null) {
+                    nr.writeStartElement("record_row");
+                    nr.writeCharacters(record.getRecordRow().getString().get(i));
+                    nr.writeEndElement();
+                    nr.flush();
+                    i++;
+                }
+            } catch (IndexOutOfBoundsException e) {
+                break;
+            }
+        }
+        nr.writeEndElement();//record rows
+        nr.writeEndElement();//record
+        nr.flush();
         nextRecord.flush();
         nextRecord.close();
         return nextRecord;
     }
 
-    private void saveTempRecord(long recordCounter, long numberOfRows, ByteArrayOutputStream tempRecord,
-                                Marshaller marshaller, List<Record> recordList) throws JAXBException, IOException {
-        RecordTable recordTable = new RecordTable();
-        recordTable.setRecord(recordList);
-        Footer footer = new Footer();
-        footer.setRecordCount(recordCounter);
-        footer.setRecordRowCount(numberOfRows);
-        recordTable.setFooter(footer);
-        marshaller.marshal(recordTable, tempRecord);
-        tempRecord.flush();
-        tempRecord.close();
-    }
-    private void saveXmlFile(long recordCounter, long numberOfRows, File file, Marshaller marshaller, List<Record> recordList) throws JAXBException {
-        RecordTable recordTable = new RecordTable();
-        recordTable.setRecord(recordList);
-        Footer footer = new Footer();
-        footer.setRecordCount(recordCounter);
-        footer.setRecordRowCount(numberOfRows);
-        recordTable.setFooter(footer);
-        marshaller.marshal(recordTable, file);
+
+    private int addRecord(int numberOfRows, XMLStreamWriter sw, Record record) throws XMLStreamException {
+        sw.writeStartElement("record");
+        sw.writeStartElement("record_id");
+        sw.writeCharacters(record.getRecordId().toString());
+        sw.writeEndElement();
+        sw.writeStartElement("record_rows");
+        int i=0;//record rows in each record
+        while(true) {
+            try {
+                if(record.getRecordRow().getString().get(i) !=null) {
+                    sw.writeStartElement("record_row");
+                    sw.writeCharacters(record.getRecordRow().getString().get(i));
+                    sw.writeEndElement();
+                    sw.flush();
+                    i++;
+                    numberOfRows++;
+                }
+            } catch (IndexOutOfBoundsException e) {
+                break;
+            }
+        }
+        sw.writeEndElement();//record rows
+        sw.writeEndElement();//record
+        sw.flush();
+        return numberOfRows;
     }
 
-    private long getNumberOfRows(long numberOfRows, Record record) {
-        long recRowCounter = record.getRecordRow().getString().size();
-        numberOfRows = numberOfRows + recRowCounter;
-        return numberOfRows;
+    private void saveFooter(long recordCounter, int numberOfRows, XMLStreamWriter sw) throws XMLStreamException {
+        sw.writeStartElement("footer");
+        sw.writeStartElement("record_count");
+        sw.writeCharacters(String.valueOf(recordCounter));
+        sw.writeEndElement();//record_count
+        sw.writeStartElement("record_row_count");
+        sw.writeCharacters(String.valueOf(numberOfRows));
+        sw.writeEndElement();//record_row_count
+        sw.writeEndElement();
+        sw.writeEndElement();//record-table
+        sw.writeEndDocument();
+        sw.flush();
+        sw.close();
     }
 
     private long getMaxProgress(String pathToFile, Long userBytes) {
@@ -153,7 +189,7 @@ public class Splitter {
         if (userBytes>7500) {
             maxProgress = fileToParse.length() / userBytes;
         } else {
-            maxProgress = fileToParse.length() / 3200; //quick way to get progress
+            maxProgress = fileToParse.length() / 7500; //quick way to get progress
         }
         return maxProgress;
     }

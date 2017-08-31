@@ -82,22 +82,6 @@ public class GeneratorController {
                 progressCircle.setProgress(0);
             }
         });
-    }
-     void onCancel(final Task generate, final Button cancelButton, final Button generateButton, final ProgressIndicator progressCircle, final String directory) {
-        cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent event) {
-                generateButton.setDisable(false);
-                cancelButton.setDisable(true);
-                generate.cancel(true);
-                progressCircle.progressProperty().unbind();
-                progressCircle.setProgress(0);
-                File dir = new File(directory);
-                for (File file : dir.listFiles()) {
-                    if (!file.isDirectory()) {
-                        file.delete();
-                    }
-                }
-            }
-        });
+
     }
 }
